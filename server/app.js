@@ -1,8 +1,11 @@
+const config = require('./config.js');
+
 const gpsd = require('node-gpsd');
+const deviceModule = require('aws-iot-device-sdk').device;
 
 const daemon = new gpsd.Daemon({
   program: 'gpsd',
-  device: '/dev/serial0',
+  device: '/dev/ttyUSB0',
   port: 2947,
   pid: '/tmp/gpsd.pid',
   readOnly: false,
@@ -24,6 +27,14 @@ const listener = new gpsd.Listener({
   parse: true
 });
 
+const device = deviceModule({
+  keyPath: config.iot.keyPath,
+  certPath: config.iot.certPath,
+  caPath: config.iot.caPath,
+  region: config.aws.region,
+  host: config.iot.host
+});
+
 daemon.start(() => {
   console.log('GPS Daemon started');
   
@@ -33,8 +44,9 @@ daemon.start(() => {
     listener.watch();
 
     listener.on('TPV', (e) => {
+      e.trip_id = 'trip_1';
       console.log('event:', e);    
+      device.publish('gps', JSON.stringify(e));
     });
-
   });
 });
