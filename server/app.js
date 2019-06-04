@@ -1,11 +1,11 @@
-const config = require('./config.js');
+const config = require('../Certs/config.js');
 
 const gpsd = require('node-gpsd');
 const deviceModule = require('aws-iot-device-sdk').device;
 
 const daemon = new gpsd.Daemon({
   program: 'gpsd',
-  device: '/dev/ttyUSB0',
+  device: '/dev/ttyserial0',
   port: 2947,
   pid: '/tmp/gpsd.pid',
   readOnly: false,
